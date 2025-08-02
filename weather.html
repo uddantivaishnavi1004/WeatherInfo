@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Info</title>
+    <style>
+        .container{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: auto;
+            align-items: center;
+            width: 15%;
+            gap: 15px;
+        }
+        .container input{
+            padding: 8px;
+            border-radius: 10px;
+            align-content: center;
+        }
+        .container button{
+            width: 55%;
+            padding: 8px;
+            border-radius: 10px;
+        }
+        .city-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+        }
+        .city-card{
+            margin: auto;
+            margin-top: 40px;
+            width: 70%;
+            box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.4);
+            padding: 20px 30px;
+            min-height: 20vh;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <form id="form">
+        <div class="container">
+        <h1>Weather Info!!!</h1>
+        <input type="text" placeholder="Enter city name" id="cityfield" />
+        <button>Submit</button>
+        </div>
+    </form>
+    <div class="city-container"></div>
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            //localStorage.removeItem("weatherData")
+            let savedData = JSON.parse(localStorage.getItem("weatherData")) || []
+            console.log(savedData)
+            savedData.forEach(display)
+        })
+        let form = document.getElementById("form")
+        let inputField = document.getElementById("cityfield")
+        let cityContainer = document.querySelector(".city-container")
+        let apikey = "1459422c461a387142ccbc2514789e2d"
+        form.addEventListener("submit", (e) => {
+            e.preventDefault()
+            let city = inputField.value
+            console.log(city)
+            let url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apikey}&units=metric`
+            fetch(url)
+                .then((res) => {
+                    return res.json()
+                })
+                .then((res) => {
+                    //console.log(res)
+                    if (res.cod === "404")
+                        alert("City not Found")
+                    const { name, sys, main } = res
+                    let weatherObj = {
+                        name,
+                        country: sys.country,
+                        temp: main.temp
+                    }
+                    console.log(weatherObj)
+                    let data = JSON.parse(localStorage.getItem("weatherData")) || []
+                    data.push(weatherObj)
+                    console.log(data)
+                    localStorage.setItem("weatherData", JSON.stringify(data))
+                    display(weatherObj)
+                })
+        })
+        function display(weatherObj) {
+            cityContainer.innerHTML +=
+                `
+            <div class="city-card">
+                <h1>${weatherObj.name}</h1>
+                <p><b>Temperature:</b> ${weatherObj.temp}</p>
+                <p><b>Country:</b> ${weatherObj.country}</p>
+            </div>
+            `
+        }
+    </script>
+</body>
+
+</html>
